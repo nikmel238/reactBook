@@ -5,13 +5,19 @@
     <title>Hello React</title>
 </head>
 <body>
-    <div>
+    <div id="app">
         <!-- Здесь будет отображено приложение -->
     </div>
     <script src="react/react.js"></script>
     <script src="react/react-dom.js"></script>
-    <script>
-        // код приложения
+    <script src="react/babel.js"></script>
+    <script type="text/babel">
+        ReactDOM.render(
+            <h1 id='my-heading'>
+                <span>Hello <em>JSX</em></span> World!
+            </h1>,
+            document.getElementById('app'),
+        );
     </script>
 </body>
 </html>
