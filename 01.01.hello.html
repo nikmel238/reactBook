@@ -12,12 +12,92 @@
     <script src="react/react-dom.js"></script>
     <script src="react/babel.js"></script>
     <script type="text/babel">
+        
+        // const MyComponent = function ({name, job}) {
+        //     return (
+        //         <h1 id='my-heading'>
+        //             <span>My name is <em>{name}</em>, the {job}</span>
+        //         </h1>
+        //     );
+        // }
+
+        
+        class LifecycleLoggerComponents extends React.PureComponent {
+            static getName() {}
+            componentDidMount() {
+                console.log(this.constructor.getName() + `::componentDidMount`);
+            }
+            componentWillUnmount() {
+                console.log(this.constructor.getName() + `::componentWillUnmount`);
+            }
+            componentDidUpdate(prevProps, prevState, snapshot) {
+                console.log(this.constructor.getName() + `::componentDidUpdate`);
+            }
+        }
+
+        class Counter extends LifecycleLoggerComponents {
+            static getName() {
+                return `Counter`;
+            }
+
+            render() {
+                console.log(this.constructor.getName() + `::render`);   
+                return (
+                    <h3>{this.props.count}</h3>    
+                );
+            };
+            
+        }
+
+        Counter.defaultProps = {
+            count: 0,
+        }
+
+        class TextAreaCounter extends LifecycleLoggerComponents {
+            static getName() {
+                return `TextAreaCounter`;
+            }
+            constructor() {
+                super();
+                this.state = {};
+                
+            }
+
+            onTextChange = (event) => {
+                this.setState({
+                    text: event.target.value,
+                });
+            }
+
+            
+            
+            render() {
+                const text = `text` in this.state ? this.state.text : this.props.text;
+                const counter = text.length > 0 ? <Counter count={text.length}/> : null;
+                console.log(this.constructor.getName() + `::render`);
+                return (
+
+                    <div>
+                        <textarea 
+                            value={text}
+                            onChange={this.onTextChange}
+                        />
+                        {counter}
+                    </div>
+                    
+                );
+            };
+        }
+
+        TextAreaCounter.defaultProps = {
+            text: 'Count me as I type',
+        }
+
         ReactDOM.render(
-            <h1 id='my-heading'>
-                <span>Hello <em>JSX</em></span> World!
-            </h1>,
+            <TextAreaCounter text='sBob'  />,
             document.getElementById('app'),
         );
+
     </script>
 </body>
 </html>
