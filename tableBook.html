@@ -12,6 +12,7 @@
     <script src="react/react.js"></script>
     <script src="react/react-dom.js"></script>
     <script src="react/babel.js"></script>
+    <script src="react/prop-types.js"></script>
     <script type="text/babel">
         const headers = [`Book`, `Author`, `Language`, `Published`, `Sales`,];
 
@@ -25,13 +26,16 @@
         ];
 
         class Excel extends React.Component {
+              
             constructor(props) {
                 super();
                 this.state = {
                     data: props.initialData,
                 }
+                
             }
             render() {
+                    
                 const headers = this.props.headers.map((title, ind) => <th key={ind}>{title}</th>);
                 const body = this.state.data.map((row, ind) => {
                     return (
@@ -50,9 +54,13 @@
                     </table>
                 );
             };
+
         }
 
-
+        Excel.propTypes = {
+                    headers: PropTypes.arrayOf(PropTypes.string),
+                    initialData: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)),
+        }
 
         ReactDOM.render(
             <Excel headers={headers} initialData={data}/>,
