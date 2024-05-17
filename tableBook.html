@@ -2,7 +2,8 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Hello React</title>
+    <link rel="stylesheet" type="text/css" href="style/table.css" />
+    <title>Таблица книг</title>
 </head>
 <body>
     <div id="app">
@@ -22,8 +23,39 @@
             [`Dream of the Red Chamber`, `Cao Xueqin`, `Chinese`, `1791`, `100 million`],
             [`The Hobbit`, `J.R.R. Tolkien`, `English`, `1937`, `100 million`],
         ];
+
+        class Excel extends React.Component {
+            constructor(props) {
+                super();
+                this.state = {
+                    data: props.initialData,
+                }
+            }
+            render() {
+                const headers = this.props.headers.map((title, ind) => <th key={ind}>{title}</th>);
+                const body = this.state.data.map((row, ind) => {
+                    return (
+                        <tr key={ind}>{row.map((cell, ind) => <td key={ind}>{cell}</td>)}</tr>
+                    );
+                });
+
+                return (
+                    <table>
+                        <thead>
+                            <tr>{headers}</tr>
+                        </thead>
+                        <tbody>
+                            {body}
+                        </tbody>    
+                    </table>
+                );
+            };
+        }
+
+
+
         ReactDOM.render(
-            _,
+            <Excel headers={headers} initialData={data}/>,
             document.getElementById('app'),
         );
 
