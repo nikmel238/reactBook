@@ -39,13 +39,18 @@
                     data: props.initialData,
                     sortby: null,
                     descending: false,
-                    edit: null,
+                    editField: {
+                        row: null,
+                        column: null,
+                        value: null,
+                    },
                 }
 
                 // определяем методы (действия) для компоненты
                 this.sort = this.sort.bind(this);
                 this.showEditor = this.showEditor.bind(this);
                 this.save = this.save.bind(this);
+                this.updateEditField = this.updateEditField.bind(this);
             }
 
             // описание метода сортировки
@@ -76,11 +81,23 @@
             // метод для определиния режима редактирование для конкретной ячейки
             showEditor(e){
                 this.setState({
-                    edit: {
+                    editField: {
                         row: parseInt(e.target.parentNode.dataset.row, 10),
                         column: e.target.cellIndex,
                     }
                 })
+            }
+
+            //метод обновления поле ввода
+            updateEditField(e){
+                const editFieldValue = e.target.value;
+                
+                this.setState({
+                    editField: {...this.state.editField,
+                        value: editFieldValue, 
+                    },
+                });
+
             }
 
             // метод сохранения после редактирования ячейки
@@ -88,17 +105,17 @@
                 e.preventDefault();
                 const input = e.target.firstChild;
                 const dataCopy = [...this.state.data];
-                dataCopy[this.state.edit.row][this.state.edit.column] = input.value;
+                dataCopy[this.state.editField.row][this.state.editField.column] = input.value;
                 
                 this.setState({
-                    edit: null,
+                    editField: null,
                     data: dataCopy,
                 });
             }
 
             render() {
                 // создаем переменную для хранения сведений по редактируесой ячейке
-                const edit = this.state.edit;    
+                const edit = this.state.editField;    
                 
                 // заполняем заголовки
                 const headers = this.props.headers.map((title, ind) => {
@@ -114,7 +131,7 @@
                         <tr key={rowInd} data-row={rowInd}>{row.map((cell, columnInd) => { 
                             if (edit && edit.row === rowInd && edit.column === columnInd) {
                                             cell = (<form onSubmit={this.save}>
-                                                        <input type={`text`} defaultValue={cell}/>
+                                                        <input type={`text`} defaultValue={cell} value={this.editField} onChange={this.updateEditField} />
                                                     </form>)
                                         }
                                     return <td key={columnInd}>{cell}</td>;
