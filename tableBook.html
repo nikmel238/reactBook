@@ -14,8 +14,8 @@
     <script src="react/babel.js"></script>
     <script src="react/prop-types.js"></script>
     <script type="text/babel">
+        /* Данные для отображения */
         const headers = [`Book`, `Author`, `Language`, `Published`, `Sales`,];
-
         const data = [
             [`A Tale of Two Cities`, `Charles Dickens`, `English`, `1859`, `200 million`],
             [`Le Petit Prince (The Little Prince)`, `Antoine de Saint-Exupery`, `French`, `1943`, `150 million`],
@@ -25,30 +25,113 @@
             [`The Hobbit`, `J.R.R. Tolkien`, `English`, `1937`, `100 million`],
         ];
 
+
+        /* Компоненты */
+        // компонента отображения таблицы
         class Excel extends React.Component {
               
             constructor(props) {
+                //метод для обращения к this
                 super();
+
+                // создаем состояние компоненты
                 this.state = {
                     data: props.initialData,
+                    sortby: null,
+                    descending: false,
+                    edit: null,
                 }
-                
+
+                // определяем методы (действия) для компоненты
+                this.sort = this.sort.bind(this);
+                this.showEditor = this.showEditor.bind(this);
+                this.save = this.save.bind(this);
             }
+
+            // описание метода сортировки
+            sort (e) {
+                // копируем данные для далбнейшей работы
+                const dataCopy = [...this.state.data];
+                // определяем индекс колонки
+                const column = e.target.cellIndex;
+                // определяем повторное нажатие по колонке
+                const descending = this.state.sortby === column && !this.state.descending;
+
+                // выполняем сортировку данных, в зависимости от нажатия на колонку
+                dataCopy.sort((a,b) => {
+                    if (a[column] === b[column]){
+                        return 0;
+                    }
+                    return descending ? a[column] < b[column] ? 1 : -1 : a[column] > b[column] ? 1 : -1;
+                });
+
+                // изменяем состояние компоненты
+                this.setState({
+                    data: dataCopy,
+                    sortby: column,
+                    descending,
+                })   
+            };
+
+            // метод для определиния режима редактирование для конкретной ячейки
+            showEditor(e){
+                this.setState({
+                    edit: {
+                        row: parseInt(e.target.parentNode.dataset.row, 10),
+                        column: e.target.cellIndex,
+                    }
+                })
+            }
+
+            // метод сохранения после редактирования ячейки
+            save(e) {
+                e.preventDefault();
+                const input = e.target.firstChild;
+                const dataCopy = [...this.state.data];
+                dataCopy[this.state.edit.row][this.state.edit.column] = input.value;
+                
+                this.setState({
+                    edit: null,
+                    data: dataCopy,
+                });
+            }
+
             render() {
-                    
-                const headers = this.props.headers.map((title, ind) => <th key={ind}>{title}</th>);
-                const body = this.state.data.map((row, ind) => {
+                // создаем переменную для хранения сведений по редактируесой ячейке
+                const edit = this.state.edit;    
+                
+                // заполняем заголовки
+                const headers = this.props.headers.map((title, ind) => {
+                    if (this.state.sortby === ind) {
+                        title += this.state.descending ? ` \u2191` : ` \u2193` 
+                    }
+                    return <th key={ind}>{title}</th>
+                });
+
+                // заполняем тело таблицы
+                const body = this.state.data.map((row, rowInd) => {
                     return (
-                        <tr key={ind}>{row.map((cell, ind) => <td key={ind}>{cell}</td>)}</tr>
+                        <tr key={rowInd} data-row={rowInd}>{row.map((cell, columnInd) => { 
+                            if (edit && edit.row === rowInd && edit.column === columnInd) {
+                                            cell = (<form onSubmit={this.save}>
+                                                        <input type={`text`} defaultValue={cell}/>
+                                                    </form>)
+                                        }
+                                    return <td key={columnInd}>{cell}</td>;
+                                }
+                            )
+                        }</tr>
                     );
                 });
 
+                
+                // отрисовываем компоненту 
                 return (
                     <table>
-                        <thead>
+                        <thead onClick={this.sort}>
                             <tr>{headers}</tr>
                         </thead>
-                        <tbody>
+                        <tbody onDoubleClick={this.showEditor}>
                             {body}
                         </tbody>    
                     </table>
