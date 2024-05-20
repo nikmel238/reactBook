@@ -58,8 +58,8 @@
                 this.showEditor = this.showEditor.bind(this);
                 this.save = this.save.bind(this);
                 this.updateEditField = this.updateEditField.bind(this);
-                // this.toggleSearch = this.toggleSearch.bind(this);
-                // this.search = this.search.bind(this);
+                this.toggleSearch = this.toggleSearch.bind(this);
+                this.search = this.search.bind(this);
             }
 
             // описание метода сортировки
@@ -122,6 +122,38 @@
                 });
             }
 
+            // метод включения/отключения метода поиска
+            toggleSearch() {
+                if (this.state.searchMode) {
+                    this.setState({
+                        data: this.preSearchData,
+                        searchMode: false,
+                    });
+                    this.preSearchData = null;
+                } else {
+                    this.preSearchData = this.state.data;
+                    this.setState({
+                        searchMode: true,
+                    });
+                }
+            }
+
+            // метод реализующий поиск
+            search(e) {
+                const needle = e.target.value.toLowerCase();
+
+                if (!needle) {
+                    this.setState({data: this.preSearchData});
+                    return;
+                }
+
+                const idx = e.target.dataset.idx;
+                const searchData = this.preSearchData.filter((row) => {
+                    return row.value[idx].toString().toLowerCase().indexOf(needle) > -1
+                });
+                this.setState({data: searchData});
+            }
+
             render() {
                 // создаем переменную для хранения сведений по редактируесой ячейке
                 const edit = this.state.editField;    
@@ -133,6 +165,13 @@
                     }
                     return <th key={ind}>{title}</th>
                 });
+
+                // строка режима поиска
+                const searchRow = this.state.searchMode ? (
+                    <tr onChange={this.search}>{this.props.headers.map((_, ind) => {
+                        return <td key={ind}><input type={`text`} data-idx={ind}/></td>
+                    })}</tr>
+                ) : null;
 
                 // заполняем тело таблицы
                 const body = this.state.data.map((row, rowInd) => {
@@ -153,14 +192,20 @@
                 
                 // отрисовываем компоненту 
                 return (
-                    <table>
-                        <thead onClick={this.sort}>
-                            <tr>{headers}</tr>
-                        </thead>
-                        <tbody onDoubleClick={this.showEditor}>
-                            {body}
-                        </tbody>    
-                    </table>
+                    <div>
+                        <button className={`toolbar`} onClick={this.toggleSearch}>
+                            {this.state.searchMode ? `Режим поиска ВЫКЛ.` : `Режим поиска ВКЛ.`}
+                        </button>
+                        <table>
+                            <thead onClick={this.sort}>
+                                <tr>{headers}</tr>
+                            </thead>
+                            <tbody onDoubleClick={this.showEditor}>
+                                {searchRow}
+                                {body}
+                            </tbody>    
+                        </table>        
+                    </div>    
                 );
             };
 
