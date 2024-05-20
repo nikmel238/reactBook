@@ -36,7 +36,11 @@
 
                 // создаем состояние компоненты
                 this.state = {
-                    data: props.initialData,
+                    data: [...props.initialData].map((row, ind) => {
+                        return {id: ind,
+                            value: row,
+                        };
+                    }),
                     sortby: null,
                     descending: false,
                     editField: {
@@ -44,13 +48,18 @@
                         column: null,
                         value: null,
                     },
+                    searchMode: false,
                 }
+
+                this.preSearchData = null;
 
                 // определяем методы (действия) для компоненты
                 this.sort = this.sort.bind(this);
                 this.showEditor = this.showEditor.bind(this);
                 this.save = this.save.bind(this);
                 this.updateEditField = this.updateEditField.bind(this);
+                // this.toggleSearch = this.toggleSearch.bind(this);
+                // this.search = this.search.bind(this);
             }
 
             // описание метода сортировки
@@ -64,10 +73,10 @@
 
                 // выполняем сортировку данных, в зависимости от нажатия на колонку
                 dataCopy.sort((a,b) => {
-                    if (a[column] === b[column]){
+                    if (a.value[column] === b.value[column]){
                         return 0;
                     }
-                    return descending ? a[column] < b[column] ? 1 : -1 : a[column] > b[column] ? 1 : -1;
+                    return descending ? a.value[column] < b.value[column] ? 1 : -1 : a.value[column] > b.value[column] ? 1 : -1;
                 });
 
                 // изменяем состояние компоненты
@@ -105,7 +114,7 @@
                 e.preventDefault();
                 const input = e.target.firstChild;
                 const dataCopy = [...this.state.data];
-                dataCopy[this.state.editField.row][this.state.editField.column] = input.value;
+                dataCopy[this.state.editField.row].value[this.state.editField.column] = input.value;
                 
                 this.setState({
                     editField: null,
@@ -128,8 +137,8 @@
                 // заполняем тело таблицы
                 const body = this.state.data.map((row, rowInd) => {
                     return (
-                        <tr key={rowInd} data-row={rowInd}>{row.map((cell, columnInd) => { 
-                            if (edit && edit.row === rowInd && edit.column === columnInd) {
+                        <tr key={row.id} data-row={row.id}>{row.value.map((cell, columnInd) => { 
+                            if (edit && edit.row === row.id && edit.column === columnInd) {
                                             cell = (<form onSubmit={this.save}>
                                                         <input type={`text`} defaultValue={cell} value={this.editField} onChange={this.updateEditField} />
                                                     </form>)
