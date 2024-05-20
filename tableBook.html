@@ -114,12 +114,23 @@
                 e.preventDefault();
                 const input = e.target.firstChild;
                 const dataCopy = [...this.state.data];
-                dataCopy[this.state.editField.row].value[this.state.editField.column] = input.value;
-                
-                this.setState({
-                    editField: null,
-                    data: dataCopy,
+               
+                dataCopy.map((row) => {
+                    if (row.id === this.state.editField.row) {
+                        row.value[this.state.editField.column] = input.value;
+                    }
+                    return row;
                 });
+
+                this.setState({
+                        editField: null,
+                        data: dataCopy,
+                    });
+
+                if (this.preSearchData) {
+                        this.preSearchData[this.state.editField.row].value[this.state.editField.column] = input.value;
+                    }
+                    
             }
 
             // метод включения/отключения метода поиска
@@ -193,9 +204,12 @@
                 // отрисовываем компоненту 
                 return (
                     <div>
-                        <button className={`toolbar`} onClick={this.toggleSearch}>
-                            {this.state.searchMode ? `Режим поиска ВЫКЛ.` : `Режим поиска ВКЛ.`}
-                        </button>
+                        <div className={`toolbar`}>
+                            <button onClick={this.toggleSearch}>
+                                {this.state.searchMode ? `Режим поиска ВЫКЛ.` : `Режим поиска ВКЛ.`}
+                            </button>
+                        </div>
+                        
                         <table>
                             <thead onClick={this.sort}>
                                 <tr>{headers}</tr>
