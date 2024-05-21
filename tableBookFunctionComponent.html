@@ -29,6 +29,11 @@
         /* Компоненты */
         // компонента отображения таблицы
         function Excel({headers, initialData, ...rest}) {
+
+            /* Используем хуки */
+            // Хук состояния
+            const [data, setData] = React.useState(initialData); 
+
             return (
                 <div>
                     <div className={`toolbar`}>
@@ -42,7 +47,7 @@
                                 })}</tr>
                         </thead>
                         <tbody>
-                            {initialData.map((row, rowInd) => {
+                            {data.map((row, rowInd) => {
                                 return (
                                     <tr key={rowInd}>{row.map((cell, columnInd) => { 
                                         return <td key={columnInd}>{cell}</td>;
