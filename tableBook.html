@@ -51,6 +51,7 @@
                     searchMode: false,
                 }
 
+                this.replayID = null;
                 // регистрируем начальное состояние
                 this.log = [structuredClone(this.state)];
 
@@ -66,14 +67,22 @@
                 this.updateEditField = this.updateEditField.bind(this);
                 this.toggleSearch = this.toggleSearch.bind(this);
                 this.search = this.search.bind(this);
+                this.keydownHandler = this.keydownHandler.bind(this);
             }
 
             componentDidMount(){
-                document.addEventListener(`keydown`, e => {
-                    if (e.altKey && e.shiftKey && e.keyCode === 82) {
+                document.addEventListener(`keydown`, this.keydownHandler);
+            }
+
+            componentWillUnmount() {
+                document.removeEventListener(`keydown`, this.keydownHandler);
+                clearInterval(this.replayID);
+            }
+
+            keydownHandler(e) {
+                if (e.altKey && e.shiftKey && e.keyCode === 82) {
                         this.replay();
                     }
-                })
             }
             // описание метода сортировки
             sort (e) {
@@ -192,9 +201,9 @@
                     return;
                 }
                 let ind = -1;
-                const interval = setInterval(() => {
+                this.replayID = setInterval(() => {
                     if (++ind === this.log.length - 1) {
-                        clearInterval(interval);
+                        clearInterval(this.replayID);
                     }
                     this.setState(this.log[ind]);
                 }, 1000);
