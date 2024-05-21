@@ -36,7 +36,7 @@
 
                 // создаем состояние компоненты
                 this.state = {
-                    data: [...props.initialData].map((row, ind) => {
+                    data: structuredClone(props.initialData).map((row, ind) => {
                         return {id: ind,
                             value: row,
                         };
@@ -51,8 +51,14 @@
                     searchMode: false,
                 }
 
+                // регистрируем начальное состояние
+                this.log = [structuredClone(this.state)];
+
                 this.preSearchData = null;
 
+
+                this.replay = this.replay.bind(this);
+                this.logSetState = this.logSetState.bind(this);  
                 // определяем методы (действия) для компоненты
                 this.sort = this.sort.bind(this);
                 this.showEditor = this.showEditor.bind(this);
@@ -62,6 +68,13 @@
                 this.search = this.search.bind(this);
             }
 
+            componentDidMount(){
+                document.addEventListener(`keydown`, e => {
+                    if (e.altKey && e.shiftKey && e.keyCode === 82) {
+                        this.replay();
+                    }
+                })
+            }
             // описание метода сортировки
             sort (e) {
                 // копируем данные для далбнейшей работы
@@ -80,7 +93,7 @@
                 });
 
                 // изменяем состояние компоненты
-                this.setState({
+                this.logSetState({
                     data: dataCopy,
                     sortby: column,
                     descending,
@@ -89,7 +102,7 @@
 
             // метод для определиния режима редактирование для конкретной ячейки
             showEditor(e){
-                this.setState({
+                this.logSetState({
                     editField: {
                         row: parseInt(e.target.parentNode.dataset.row, 10),
                         column: e.target.cellIndex,
@@ -101,7 +114,7 @@
             updateEditField(e){
                 const editFieldValue = e.target.value;
                 
-                this.setState({
+                this.logSetState({
                     editField: {...this.state.editField,
                         value: editFieldValue, 
                     },
@@ -122,7 +135,7 @@
                     return row;
                 });
 
-                this.setState({
+                this.logSetState({
                         editField: null,
                         data: dataCopy,
                     });
@@ -136,14 +149,14 @@
             // метод включения/отключения метода поиска
             toggleSearch() {
                 if (this.state.searchMode) {
-                    this.setState({
+                    this.logSetState({
                         data: this.preSearchData,
                         searchMode: false,
                     });
                     this.preSearchData = null;
                 } else {
                     this.preSearchData = this.state.data;
-                    this.setState({
+                    this.logSetState({
                         searchMode: true,
                     });
                 }
@@ -154,7 +167,7 @@
                 const needle = e.target.value.toLowerCase();
 
                 if (!needle) {
-                    this.setState({data: this.preSearchData});
+                    this.logSetState({data: this.preSearchData});
                     return;
                 }
 
@@ -162,7 +175,29 @@
                 const searchData = this.preSearchData.filter((row) => {
                     return row.value[idx].toString().toLowerCase().indexOf(needle) > -1
                 });
-                this.setState({data: searchData});
+                this.logSetState({data: searchData});
+            }
+
+            logSetState(newState){
+                // запоминаем старое состояние в клоне
+                this.log.push(structuredClone(newState));
+                console.log(this.log);
+                // записываем его в стайт
+                this.setState(newState);
+            }
+
+            replay(){
+                if (this.log.length === 1) {
+                    console.warn(`Нет предыдущих состояний для повтора`);
+                    return;
+                }
+                let ind = -1;
+                const interval = setInterval(() => {
+                    if (++ind === this.log.length - 1) {
+                        clearInterval(interval);
+                    }
+                    this.setState(this.log[ind]);
+                }, 1000);
             }
 
             render() {
