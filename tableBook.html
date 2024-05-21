@@ -68,10 +68,24 @@
                 this.toggleSearch = this.toggleSearch.bind(this);
                 this.search = this.search.bind(this);
                 this.keydownHandler = this.keydownHandler.bind(this);
+                this.downloadJSON = this.download.bind(this, `json`);
+                this.downloadCSV = this.download.bind(this, `csv`);
             }
+
 
             componentDidMount(){
                 document.addEventListener(`keydown`, this.keydownHandler);
+
+                fetch(`https://www.phpied.com/files/reactbook/table-data.json`)
+                .then((response) => response.json())
+                .then((initialData) => {
+                    const data = structuredClone(initialData).map((row, ind) => {
+                        return {id: ind,
+                            value: row,
+                        };
+                    });
+                    this.setState({data});
+                })
             }
 
             componentWillUnmount() {
@@ -209,6 +223,25 @@
                 }, 1000);
             }
 
+            // метод, реализующие скачивание данных
+            download(format, ev){
+                const dataCopy = [...this.state.data].map(row => row.value);
+                const contents = (format === `json`) ? JSON.stringify(data, null, ` `)
+                    : dataCopy.reduce((result, row) => {
+                        return (
+                            result + row.reduce((rowcontent, cellcontent, idx) => {
+                                const cell = cellcontent.replace(/"/g, '""');
+                                const delimiter = idx < row.length - 1 ? ',' : ' ';
+                                return `${rowcontent}"${cellcontent}"${delimiter}`;
+                            }, '') + '\n'
+                        );
+                    }, '');
+                    const URL = window.URL || window.webkitURL;
+                    const blob = new Blob([contents], {type: 'text/' + format});
+                    ev.target.href = URL.createObjectURL(blob);
+                    ev.target.download = 'data.' + format;
+            }
+
             render() {
                 // создаем переменную для хранения сведений по редактируесой ячейке
                 const edit = this.state.editField;    
@@ -252,16 +285,22 @@
                             <button onClick={this.toggleSearch}>
                                 {this.state.searchMode ? `Режим поиска ВЫКЛ.` : `Режим поиска ВКЛ.`}
                             </button>
+                            <a href={`data.json`} onClick={this.downloadJSON}>Экспорт данных (JSON)</a>
+                            <a href={`data.csv`} onClick={this.downloadCSV}>Экспорт данных (CSV)</a>
                         </div>
                         
                         <table>
                             <thead onClick={this.sort}>
                                 <tr>{headers}</tr>
                             </thead>
-                            <tbody onDoubleClick={this.showEditor}>
+                            {(this.state.data.length === 0) ? (
+                                <tbody>
+                                    <tr><td colSpan={this.props.headers.length}>Загрузка данных...</td></tr>
+                                </tbody>
+                            ) : (<tbody onDoubleClick={this.showEditor}>
                                 {searchRow}
                                 {body}
-                            </tbody>    
+                            </tbody>)}    
                         </table>        
                     </div>    
                 );
@@ -275,7 +314,7 @@
         }
 
         ReactDOM.render(
-            <Excel headers={headers} initialData={data}/>,
+            <Excel headers={headers} initialData={[]}/>,
             document.getElementById('app'),
         );
 
