@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="style/table.css" />
+    <title>Таблица книг</title>
+</head>
+<body>
+    <div id="app">
+        <!-- Здесь будет отображено приложение -->
+    </div>
+    <script src="react/react.js"></script>
+    <script src="react/react-dom.js"></script>
+    <script src="react/babel.js"></script>
+    <script src="react/prop-types.js"></script>
+    <script type="text/babel">
+        /* Данные для отображения */
+        const headers = [`Book`, `Author`, `Language`, `Published`, `Sales`,];
+        const data = [
+            [`A Tale of Two Cities`, `Charles Dickens`, `English`, `1859`, `200 million`],
+            [`Le Petit Prince (The Little Prince)`, `Antoine de Saint-Exupery`, `French`, `1943`, `150 million`],
+            [`Harry Potter and the Philosopher's Stone`, `J.K. Rowling`, `English`, `1997`, `120 million`],
+            [`And Then There Were None`, `Agatha Christie`, `English`, `1939`, `100 million`],
+            [`Dream of the Red Chamber`, `Cao Xueqin`, `Chinese`, `1791`, `100 million`],
+            [`The Hobbit`, `J.R.R. Tolkien`, `English`, `1937`, `100 million`],
+        ];
+
+
+        /* Компоненты */
+        // компонента отображения таблицы
+        function Excel({headers, initialData, ...rest}) {
+            return (
+                <div>
+                    <div className={`toolbar`}>
+                            
+                    </div>
+                        
+                    <table>
+                        <thead>
+                            <tr>{headers.map((title, ind) => {
+                                return <th key={ind}>{title}</th>
+                                })}</tr>
+                        </thead>
+                        <tbody>
+                            {initialData.map((row, rowInd) => {
+                                return (
+                                    <tr key={rowInd}>{row.map((cell, columnInd) => { 
+                                        return <td key={columnInd}>{cell}</td>;
+                                    })}</tr>
+                                );
+                            })}
+                        </tbody>    
+                    </table>        
+                </div>    
+            );
+        }
+        
+        Excel.propTypes = {
+                    headers: PropTypes.arrayOf(PropTypes.string),
+                    initialData: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.string)),
+        }
+
+        ReactDOM.render(
+            <Excel headers={headers} initialData={data}/>,
+            document.getElementById('app'),
+        );
+
+    </script>
+</body>
+</html>
