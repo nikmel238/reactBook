@@ -38,6 +38,8 @@
                 descending: false,
             });
             const [edit, setEdit] = React.useState(null);
+            const [search, setSearch] = React.useState(false);
+            const [preSearchData, setPreSearchData] = React.useState(null);
 
             // функция реализаии сортировки
             function sort(e) {
@@ -80,10 +82,40 @@
                     setData(dataCopy);
                     setEdit(null);
                 }
+
+                // функция включения режима поиска
+                function toggleSearch() {
+                    if (search) {
+                        setData(preSearchData);
+                        setSearch(false);
+                        setPreSearchData(null);
+                    } else {
+                        setPreSearchData(data);
+                        setSearch(true);
+                    }
+                }
+
+                // функция реализующая поиск
+                function filter(e){
+                    const needle = e.target.value.toLowerCase();
+
+                    if (!needle) {
+                        setData(preSearchData);
+                    }
+
+                    const idx = e.target.dataset.idx;
+                    const searchData = preSearchData.filter((row) => {
+                        return row[idx].toString().toLowerCase().indexOf(needle) > -1
+                    });
+                    setData(searchData);
+                }
+
             return (
                 <div>
                     <div className={`toolbar`}>
-                            
+                        <button onClick={toggleSearch}>
+                                {search ? `Режим поиска ВЫКЛ.` : `Режим поиска ВКЛ.`}
+                        </button>
                     </div>
                         
                     <table>
@@ -96,6 +128,11 @@
                                 })}</tr>
                         </thead>
                         <tbody onDoubleClick={showEdit}>
+                            {// строка режима поиска
+                            search ? (<tr onChange={filter}>{headers.map((_, idx) => {
+                                return <td key={idx}><input type={`text`} data-idx={idx}/></td>
+                            })}</tr>) 
+                            : null}
                             {data.map((row, rowIdx) => {
                                 return (
                                     <tr key={rowIdx} data-row={rowIdx}>
