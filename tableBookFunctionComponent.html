@@ -31,12 +31,13 @@
         function Excel({headers, initialData, ...rest}) {
 
             /* Используем хуки */
-            // Хук состояния
+            // Хуки состояния
             const [data, setData] = React.useState(initialData); 
             const [sorting, setSorting] = React.useState({
                 column: null,
                 descending: false,
             });
+            const [edit, setEdit] = React.useState(null);
 
             // функция реализаии сортировки
             function sort(e) {
@@ -58,8 +59,27 @@
                     column,
                     descending,
                 })
-
             }
+            
+                // функция реализации включения режима редактирования
+                function showEdit(e) {
+                    setEdit({
+                        row: parseInt(e.target.parentNode.dataset.row, 10),
+                        column: e.target.cellIndex,
+                    });
+                }
+
+                // функция реализущая сохраненив редактирования данных
+                function save(e) {
+                    e.preventDefault();
+                    const input = e.target.firstChild;
+                    const dataCopy = [...data];
+               
+                    dataCopy[edit.row][edit.column] = input.value;
+
+                    setData(dataCopy);
+                    setEdit(null);
+                }
             return (
                 <div>
                     <div className={`toolbar`}>
@@ -75,11 +95,19 @@
                                 return <th key={idx}>{title}</th>
                                 })}</tr>
                         </thead>
-                        <tbody>
+                        <tbody onDoubleClick={showEdit}>
                             {data.map((row, rowIdx) => {
                                 return (
-                                    <tr key={rowIdx}>{row.map((cell, columnIdx) => { 
-                                        return <td key={columnIdx}>{cell}</td>;
+                                    <tr key={rowIdx} data-row={rowIdx}>
+                                        {row.map((cell, columnIdx) => {
+                                            if (edit && edit.row === rowIdx && edit.column === columnIdx) {
+                                                cell = (
+                                                    <form onSubmit={save}>
+                                                        <input type={`text`} defaultValue={cell}/>
+                                                    </form>
+                                                )
+                                            } 
+                                            return <td key={columnIdx}>{cell}</td>;
                                     })}</tr>
                                 );
                             })}
