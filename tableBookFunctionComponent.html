@@ -33,7 +33,33 @@
             /* Используем хуки */
             // Хук состояния
             const [data, setData] = React.useState(initialData); 
+            const [sorting, setSorting] = React.useState({
+                column: null,
+                descending: false,
+            });
 
+            // функция реализаии сортировки
+            function sort(e) {
+                const column = e.target.cellIndex;
+                const descending = sorting.column === column && !sorting.descending;
+                const dataCopy = [...data];
+
+                dataCopy.sort((a,b) => {
+                    if (a[column] === b[column]){
+                        return 0;
+                    }
+                    return descending 
+                        ? a[column] < b[column] ? 1 : -1 
+                        : a[column] > b[column] ? 1 : -1;
+                });
+
+                setData(dataCopy);
+                setSorting({
+                    column,
+                    descending,
+                })
+
+            }
             return (
                 <div>
                     <div className={`toolbar`}>
@@ -41,16 +67,19 @@
                     </div>
                         
                     <table>
-                        <thead>
-                            <tr>{headers.map((title, ind) => {
-                                return <th key={ind}>{title}</th>
+                        <thead onClick={sort}>
+                            <tr>{headers.map((title, idx) => {
+                                if (sorting.column === idx) {
+                                    title += sorting.descending ? ` \u2191` : ` \u2193`;
+                                }
+                                return <th key={idx}>{title}</th>
                                 })}</tr>
                         </thead>
                         <tbody>
-                            {data.map((row, rowInd) => {
+                            {data.map((row, rowIdx) => {
                                 return (
-                                    <tr key={rowInd}>{row.map((cell, columnInd) => { 
-                                        return <td key={columnInd}>{cell}</td>;
+                                    <tr key={rowIdx}>{row.map((cell, columnIdx) => { 
+                                        return <td key={columnIdx}>{cell}</td>;
                                     })}</tr>
                                 );
                             })}
