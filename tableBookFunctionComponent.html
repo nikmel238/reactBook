@@ -26,68 +26,103 @@
         ];
 
         /* Переменные для хранения логов */
-        let dataLog = [];
-        let auxLog = [];
-        let isReplaying = false;
-        let replayID = null;
+        // let dataLog = [];
+        // let auxLog = [];
+        // let isReplaying = false;
+        // let replayID = null;
 
         // пользовательские хуки
-        function useLoggedState (initialValue, isData) {
-                const [state, setState] = React.useState(initialValue);
+        // function useLoggedState (initialValue, isData) {
+        //         const [state, setState] = React.useState(initialValue);
 
-                React.useEffect(() => {
-                    if (isReplaying) {
-                        return;
-                    }
-                    if (isData){
-                        dataLog.push([structuredClone(state), setState]);
-                    } else {
-                        const idx = dataLog.length - 1;
-                        if (!auxLog[idx]) {
-                            auxLog[idx] = [];
-                        }
-                        auxLog[idx].push([state, setState]);
-                    }
-                }, [state]);
+        //         React.useEffect(() => {
+        //             if (isReplaying) {
+        //                 return;
+        //             }
+        //             if (isData){
+        //                 dataLog.push([structuredClone(state), setState]);
+        //             } else {
+        //                 const idx = dataLog.length - 1;
+        //                 if (!auxLog[idx]) {
+        //                     auxLog[idx] = [];
+        //                 }
+        //                 auxLog[idx].push([state, setState]);
+        //             }
+        //         }, [state]);
 
-                return [state, setState];
-            }
+        //         return [state, setState];
+        //     }
 
         // функция воспроизведения логов
-        function replay(){
-                    isReplaying = true;
-                    let idx = 0;
-                    replayID = setInterval(() => {
-                        const [data, fn] = dataLog[idx];
-                        fn(data);
-                        auxLog[idx] && 
-                        auxLog[idx].forEach((log) => {
-                            const [data, fn] = log;
-                            fn(data);
-                        });
-                        idx++;
-                        if (idx > dataLog.length - 1) {
-                            isReplaying = false;
-                            clearInterval(replayID);
-                            return;
-                        }
-                    }, 1000);
-                }
+        // function replay(){
+        //             isReplaying = true;
+        //             let idx = 0;
+        //             replayID = setInterval(() => {
+        //                 const [data, fn] = dataLog[idx];
+        //                 fn(data);
+        //                 auxLog[idx] && 
+        //                 auxLog[idx].forEach((log) => {
+        //                     const [data, fn] = log;
+        //                     fn(data);
+        //                 });
+        //                 idx++;
+        //                 if (idx > dataLog.length - 1) {
+        //                     isReplaying = false;
+        //                     clearInterval(replayID);
+        //                     return;
+        //                 }
+        //             }, 1000);
+        //         }
 
+                //  Редюсер
+                let originalData = null;
+                function reducer (data, action) {
+                    switch (action.type) {
+                        case `sort`:
+                            const {column, descending} = action.payload;
+                            return structuredClone(data).sort((a,b) => {
+                                        if (a[column] === b[column]){
+                                            return 0;
+                                        }
+                                        return descending 
+                                            ? a[column] < b[column] ? 1 : -1 
+                                            : a[column] > b[column] ? 1 : -1;
+                                    });                          
+                            break;
+                        case `save`:            
+                            data[action.payload.edit.row][action.payload.edit.column] = action.payload.value;
+                            return data;
+                            break;
+                        case `startSearching`:
+                            originalData = data;
+                            return originalData;
+                            break;
+                        case `doneSearching`:
+                            return originalData;
+                            break;
+                        case `search`:
+                            return originalData.filter((row) => {
+                                        return row[action.payload.column].toString().toLowerCase().indexOf(action.payload.needle) > -1
+                                    });
+                            break;
+                        default:
+                            break;
+                    }
+                }
         /* Компоненты */
         // компонента отображения таблицы
         function Excel({headers, initialData, ...rest}) {
             
             /* Используем хуки */
                 // Хуки состояния
-                const [data, setData] = useLoggedState(initialData, true); 
-                const [sorting, setSorting] = useLoggedState({
+                const [data, dispatch] =  React.useReducer(reducer, initialData); 
+                const [sorting, setSorting] = React.useState({
                     column: null,
                     descending: false,
                 });
-                const [edit, setEdit] = useLoggedState(null);
-                const [search, setSearch] = useLoggedState(false);
-                const [preSearchData, setPreSearchData] = useLoggedState(null);
+                const [edit, setEdit] = React.useState(null);
+                const [search, setSearch] = React.useState(false);
+                const [preSearchData, setPreSearchData] = React.useState(null);
 
                 // Хук эффект
                 React.useEffect(() => {
@@ -110,22 +145,17 @@
                 function sort(e) {
                     const column = e.target.cellIndex;
                     const descending = sorting.column === column && !sorting.descending;
-                    const dataCopy = [...data];
 
-                    dataCopy.sort((a,b) => {
-                        if (a[column] === b[column]){
-                            return 0;
-                        }
-                        return descending 
-                            ? a[column] < b[column] ? 1 : -1 
-                            : a[column] > b[column] ? 1 : -1;
-                    });
-
-                    setData(dataCopy);
                     setSorting({
                         column,
                         descending,
                     })
+                    
+                    dispatch({
+                        type: `sort`,
+                        payload: {column, descending},
+                    });
+                    
                 }
             
                 // функция реализации включения режима редактирования
@@ -139,40 +169,34 @@
                 // функция реализущая сохраненив редактирования данных
                 function save(e) {
                     e.preventDefault();
-                    const input = e.target.firstChild;
-                    const dataCopy = [...data];
-               
-                    dataCopy[edit.row][edit.column] = input.value;
+                    const value = e.target.firstChild.value;
 
-                    setData(dataCopy);
+                    dispatch({
+                        type: `save`,
+                        payload: {edit, value}
+                    });
                     setEdit(null);
                 }
 
                 // функция включения режима поиска
                 function toggleSearch() {
-                    if (search) {
-                        setData(preSearchData);
-                        setSearch(false);
-                        setPreSearchData(null);
+                    if (!search) {
+                        dispatch({type: `startSearching`});
                     } else {
-                        setPreSearchData(data);
-                        setSearch(true);
+                        dispatch({type: `doneSearching`});
                     }
+                    setSearch(!search);
                 }
 
                 // функция реализующая поиск
                 function filter(e){
-                    const needle = e.target.value.toLowerCase();
-
-                    if (!needle) {
-                        setData(preSearchData);
-                    }
-
-                    const idx = e.target.dataset.idx;
-                    const searchData = preSearchData.filter((row) => {
-                        return row[idx].toString().toLowerCase().indexOf(needle) > -1
+                    const needle = e.target.value;
+                    const column = e.target.dataset.idx;
+                    dispatch({
+                        type: `search`,
+                        payload: {needle, column}
                     });
-                    setData(searchData);
+                    setEdit(null);
                 }
 
                 
