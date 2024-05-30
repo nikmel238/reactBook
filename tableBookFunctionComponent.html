@@ -25,43 +25,108 @@
             [`The Hobbit`, `J.R.R. Tolkien`, `English`, `1937`, `100 million`],
         ];
 
+        /* Переменные для хранения логов */
+        let dataLog = [];
+        let auxLog = [];
+        let isReplaying = false;
+        let replayID = null;
+
+        // пользовательские хуки
+        function useLoggedState (initialValue, isData) {
+                const [state, setState] = React.useState(initialValue);
+
+                React.useEffect(() => {
+                    if (isReplaying) {
+                        return;
+                    }
+                    if (isData){
+                        dataLog.push([structuredClone(state), setState]);
+                    } else {
+                        const idx = dataLog.length - 1;
+                        if (!auxLog[idx]) {
+                            auxLog[idx] = [];
+                        }
+                        auxLog[idx].push([state, setState]);
+                    }
+                }, [state]);
+
+                return [state, setState];
+            }
+
+        // функция воспроизведения логов
+        function replay(){
+                    isReplaying = true;
+                    let idx = 0;
+                    replayID = setInterval(() => {
+                        const [data, fn] = dataLog[idx];
+                        fn(data);
+                        auxLog[idx] && 
+                        auxLog[idx].forEach((log) => {
+                            const [data, fn] = log;
+                            fn(data);
+                        });
+                        idx++;
+                        if (idx > dataLog.length - 1) {
+                            isReplaying = false;
+                            clearInterval(replayID);
+                            return;
+                        }
+                    }, 1000);
+                }
 
         /* Компоненты */
         // компонента отображения таблицы
         function Excel({headers, initialData, ...rest}) {
-
+            
             /* Используем хуки */
-            // Хуки состояния
-            const [data, setData] = React.useState(initialData); 
-            const [sorting, setSorting] = React.useState({
-                column: null,
-                descending: false,
-            });
-            const [edit, setEdit] = React.useState(null);
-            const [search, setSearch] = React.useState(false);
-            const [preSearchData, setPreSearchData] = React.useState(null);
-
-            // функция реализаии сортировки
-            function sort(e) {
-                const column = e.target.cellIndex;
-                const descending = sorting.column === column && !sorting.descending;
-                const dataCopy = [...data];
-
-                dataCopy.sort((a,b) => {
-                    if (a[column] === b[column]){
-                        return 0;
-                    }
-                    return descending 
-                        ? a[column] < b[column] ? 1 : -1 
-                        : a[column] > b[column] ? 1 : -1;
+                // Хуки состояния
+                const [data, setData] = useLoggedState(initialData, true); 
+                const [sorting, setSorting] = useLoggedState({
+                    column: null,
+                    descending: false,
                 });
+                const [edit, setEdit] = useLoggedState(null);
+                const [search, setSearch] = useLoggedState(false);
+                const [preSearchData, setPreSearchData] = useLoggedState(null);
 
-                setData(dataCopy);
-                setSorting({
-                    column,
-                    descending,
-                })
-            }
+                // Хук эффект
+                React.useEffect(() => {
+                    function keydownHandler(e) {
+                        if (e.altKey && e.shiftKey && e.keyCode === 82) {
+                            replay();
+                        }
+                    }
+                    document.addEventListener(`keydown`, keydownHandler);
+                    return () => {
+                        document.removeEventListener(`keydown`, keydownHandler);
+                        clearInterval(replayID);
+                        dataLog = [];
+                        auxLog = [];
+                    }
+                } ,[]);
+
+                /* Функции  */
+                // функция реализаии сортировки
+                function sort(e) {
+                    const column = e.target.cellIndex;
+                    const descending = sorting.column === column && !sorting.descending;
+                    const dataCopy = [...data];
+
+                    dataCopy.sort((a,b) => {
+                        if (a[column] === b[column]){
+                            return 0;
+                        }
+                        return descending 
+                            ? a[column] < b[column] ? 1 : -1 
+                            : a[column] > b[column] ? 1 : -1;
+                    });
+
+                    setData(dataCopy);
+                    setSorting({
+                        column,
+                        descending,
+                    })
+                }
             
                 // функция реализации включения режима редактирования
                 function showEdit(e) {
@@ -110,6 +175,7 @@
                     setData(searchData);
                 }
 
+                
             return (
                 <div>
                     <div className={`toolbar`}>
