@@ -113,9 +113,9 @@ function Excel({headers, initialData}) {
     return (
       <div className="Excel">
         <div className="toolbar">
-          <button onClick={toggleSearch}>
+          {/* <button onClick={toggleSearch}>
             {search ? 'Hide search' : 'Show search'}
-          </button>
+          </button> */}
         </div>
         <table>
           <thead onClick={sort}>
