@@ -1,4 +1,5 @@
 import { useReducer, useState } from "react";
+import './Excel.css';
 
 let originalData = null;
 function reducer(data, action) {
@@ -112,11 +113,11 @@ function Excel({headers, initialData}) {
 
     return (
       <div className="Excel">
-        <div className="toolbar">
-          {/* <button onClick={toggleSearch}>
+        {/* <div className="toolbar">
+          <button onClick={toggleSearch}>
             {search ? 'Hide search' : 'Show search'}
-          </button> */}
-        </div>
+          </button>
+        </div> */}
         <table>
           <thead onClick={sort}>
             <tr>

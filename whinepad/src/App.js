@@ -1,3 +1,5 @@
+import './App.css';
+import Discovery from './components/Discovery';
 import Excel from './components/Excel';
 
 let headers = localStorage.getItem(`headers`);
@@ -8,7 +10,12 @@ if (!headers) {
   data = [[`Red whine`, `2021`, `3`, `meh`]];
 }
 
+const isDiscovery = window.location.pathname.replace(/\//g, ``) === `discovery`;
+
 function App() {
+  if (isDiscovery) {
+    return <Discovery />
+  }
   return (
     <div>
       <Excel headers={headers} initialData={data}/>      
