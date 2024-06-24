@@ -2,6 +2,7 @@ import Body from "./Body";
 import Excel from "./Excel";
 import Logo from "./Logo";
 import Button from "./Button";
+import Suggest from "./Suggest";
 
 function Discovery() {
     return (
@@ -23,6 +24,10 @@ function Discovery() {
             <p>
                 Пользовательское имя класа: {` `}
                 <Button className={`Discovery-custom-button`}>Ничего не делаю</Button>
+            </p>
+            <h2>Suggest</h2>
+            <p>
+                <Suggest options={[`eenie`, `meenie`, `miney`, `mo `]}></Suggest>
             </p>
 
         </div>
