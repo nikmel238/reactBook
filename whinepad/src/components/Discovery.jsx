@@ -4,6 +4,7 @@ import Logo from "./Logo";
 import Button from "./Button";
 import Suggest from "./Suggest";
 import Rating from "./Rating";
+import FormInput from "./FormInput";
 
 function Discovery() {
     return (
@@ -43,6 +44,45 @@ function Discovery() {
             <p>
                 Только чтение: <Rating readonly={true} defaultValue={3} />
             </p>
+            <h2>Различные формы</h2>
+            <table className={"Discovery-pad"}>
+                <tbody>
+                    <tr>
+                        <td>Стандартное поле для ввода</td>
+                        <td><FormInput /></td>
+                    </tr>
+                    <tr>
+                        <td>Поле с заданным значением</td>
+                        <td><FormInput defaultValue={`with a default`}/></td>
+                    </tr>
+                    <tr>
+                        <td>Поле для ввода "год"</td>
+                        <td><FormInput type={`year`}/></td>
+                    </tr>
+                    <tr>
+                        <td>Поле тип "рейтинг"</td>
+                        <td><FormInput type={`rating`} defaultValue={4}/></td>
+                    </tr>
+                    <tr>
+                        <td>Поле выпадающий список</td>
+                        <td>
+                            <FormInput 
+                                type={`suggest`}
+                                options={[`red`, `green`, `blue`]}
+                                defaultValue={`green`}
+                            />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Стандартное текстовое поле</td>
+                        <td>
+                            <FormInput 
+                                type={`textarea`}
+                            />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     );
 }
