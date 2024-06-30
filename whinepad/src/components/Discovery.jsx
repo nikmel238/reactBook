@@ -3,6 +3,7 @@ import Excel from "./Excel";
 import Logo from "./Logo";
 import Button from "./Button";
 import Suggest from "./Suggest";
+import Rating from "./Rating";
 
 function Discovery() {
     return (
@@ -29,7 +30,19 @@ function Discovery() {
             <p>
                 <Suggest options={[`eenie`, `meenie`, `miney`, `mo `]}></Suggest>
             </p>
-
+            <h2>Rating</h2>
+            <p>
+                Оценка не поставлена: <Rating />
+            </p>
+            <p>
+                Рейтинг равен "4": <Rating defaultValue={4}/> 
+            </p>
+            <p>
+                Максимальный рейтинг: <Rating max={11} />
+            </p>
+            <p>
+                Только чтение: <Rating readonly={true} defaultValue={3} />
+            </p>
         </div>
     );
 }
