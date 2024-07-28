@@ -5,6 +5,7 @@ import Button from "./Button";
 import Suggest from "./Suggest";
 import Rating from "./Rating";
 import FormInput from "./FormInput";
+import Actions from "./Actions";
 
 function Discovery() {
     return (
@@ -83,6 +84,8 @@ function Discovery() {
                     </tr>
                 </tbody>
             </table>
+            <h2>Действия</h2>
+            <Actions onAction={(type) => alert(type)}/>
         </div>
     );
 }

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { forwardRef } from 'react';
 import FormInput from './FormInput';
 import Rating from './Rating';
-
+import './Form.css';
 
 const Form = forwardRef(({fields, initialData = {}, readonly = false}, ref) => {
     <form className="Form" ref={ref}>
