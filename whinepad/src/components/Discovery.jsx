@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import Body from "./Body";
 import Excel from "./Excel";
 import Logo from "./Logo";
@@ -6,6 +8,7 @@ import Suggest from "./Suggest";
 import Rating from "./Rating";
 import FormInput from "./FormInput";
 import Actions from "./Actions";
+import Dialog from "./Dialog";
 
 function Discovery() {
     return (
@@ -86,8 +89,44 @@ function Discovery() {
             </table>
             <h2>Действия</h2>
             <Actions onAction={(type) => alert(type)}/>
+            {DialogExample()}
         </div>
     );
+    
 }
+
+function DialogExample() {
+    const [example, setExample] = useState(null);
+    return (
+        <>
+            <p>
+                <Button onClick={() => setExample(1)}>Пример 1</Button>
+                <Button onClick={() => setExample(2)}>Пример 2</Button>
+            </p>
+            {example === 1? (
+                <Dialog 
+                    modal
+                    header="Отдельное модальное окно"
+                    onAction={(type) => {
+                        alert(type);
+                        setExample(null);
+                    }}>Hello, Dialog!</Dialog>
+            ) : null}
+
+            {example === 2? (
+                <Dialog 
+                    header="Без модального окна, и кнопки отмена"
+                    hasCancel={false}
+                    confirmLabel="Любое название"
+                    onAction={(type) => {
+                        alert(type);
+                        setExample(null);
+                    }}>Здесь используется все, что угодно, например, <Button>Кнопка</Button></Dialog>
+            ) : null}
+        </>
+    );
+}
+
+
 
 export default Discovery;
