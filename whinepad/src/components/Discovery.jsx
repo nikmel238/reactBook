@@ -9,6 +9,7 @@ import Rating from "./Rating";
 import FormInput from "./FormInput";
 import Actions from "./Actions";
 import Dialog from "./Dialog";
+import Header from "./Header";
 
 function Discovery() {
     return (
@@ -89,7 +90,10 @@ function Discovery() {
             </table>
             <h2>Действия</h2>
             <Actions onAction={(type) => alert(type)}/>
+            <h2>Работа в окнами</h2>
             {DialogExample()}
+            <h2>Заголовок сайта</h2>
+            <Header/>
         </div>
     );
     
