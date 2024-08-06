@@ -2,19 +2,19 @@ import classification from './classification';
 
 const schema = {
   name: {
-    label: 'Name',
+    label: 'Название',
     show: true,
     samples: ['$2 Chuck', 'Chateau React', 'Vint.js'],
     align: 'left',
   },
   year: {
-    label: 'Year',
+    label: 'Год',
     type: 'year',
     show: true,
     samples: [2015, 2013, 2021],
   },
   grape: {
-    label: 'Grape',
+    label: 'Виноград',
     type: 'suggest',
     options: classification.grapes,
     show: true,
@@ -22,13 +22,13 @@ const schema = {
     align: 'left',
   },
   rating: {
-    label: 'Rating',
+    label: 'Рейтинг',
     type: 'rating',
     show: true,
     samples: [3, 1, 5],
   },
   comments: {
-    label: 'Comments',
+    label: 'Комментарии',
     type: 'textarea',
     samples: ['Nice for the price', 'XML in my JS, orly??!', 'Lodi? Again!'],
   },

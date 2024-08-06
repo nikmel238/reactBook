@@ -16,13 +16,13 @@ function Dialog (props) {
     useEffect(() => {
         function dismissClick(e) {
             if (e.target.classList.contains(`DialogModal`)){
-                onAction('Отмена');
+                onAction('dismiss');
             }
         }
 
         function dismissKey(e) {
             if (e.key === `Escape`) {
-                onAction(`Отмена`);
+                onAction(`dismiss`);
             }
         }
 
@@ -51,10 +51,10 @@ function Dialog (props) {
                     {hasCancel ? 
                         <Button 
                             className="DialogDismiss"
-                            onClick={() => onAction('Отмена')}
+                            onClick={() => onAction('dismiss')}
                         >Отмена</Button> 
                     : null}
-                    <Button onClick={() => onAction(hasCancel ? 'OK' : 'Отмена')}>{confirmLabel}</Button>
+                    <Button onClick={() => onAction(hasCancel ? 'confirm' : 'dismiss')}>{confirmLabel}</Button>
                 </div>
             </div>
         </div>

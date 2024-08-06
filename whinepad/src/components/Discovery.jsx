@@ -11,11 +11,27 @@ import Actions from "./Actions";
 import Dialog from "./Dialog";
 import Header from "./Header";
 
+import schema from '../config/schema.js';
+
 function Discovery() {
     return (
         <div>
             <h2>Excel</h2>
-            <Excel headers={[`Name`, `Year`]} initialData={[[`Charles`, `1859`], [`Antoine`, `1943`]]}/>
+            <Excel 
+                schema={schema} 
+                // headers={[`Name`, `Year`, `Grape`, `Rating`, `Actions`]} 
+                initialData={schema.name.samples.map((_, idx) => {
+                    const element = {};
+                    for (let key in schema) {
+                        element[key] = schema[key].samples[idx];
+                    }
+                    return element;
+                })}
+                onDataChange={(data) => {
+                        console.log(data);
+                    }
+                }
+            />
             <h2>Logo</h2>
             <Logo />
             <h2>Body</h2>
